@@ -13,7 +13,7 @@
 # See the file 'doc/COPYING' for copying permission
 #
 import time
-from utils import log, common
+from utils import log, common, config
 from flask import jsonify, render_template
 
 from app import web, CobraTaskInfo, CobraProjects, CobraResults, CobraRules, CobraVuls, CobraExt
@@ -22,7 +22,11 @@ from app import web, CobraTaskInfo, CobraProjects, CobraResults, CobraRules, Cob
 @web.route('/', methods=['GET'])
 @web.route('/index', methods=['GET'])
 def homepage():
-    return render_template('index.html')
+    data = {
+        'key': common.md5('CobraAuthKey'),
+        'extensions': config.Config('upload', 'extensions').value
+    }
+    return render_template('index.html', data=data)
 
 
 @web.route('/report/<int:task_id>', methods=['GET'])
@@ -49,9 +53,14 @@ def report(task_id):
 
     # Project Info
     project = CobraProjects.query.filter_by(repository=repository).first()
-    project_name = project.name
-    author = project.author
-    project_description = project.remark
+    if project is None:
+        project_name = repository
+        author = 'Anonymous'
+        project_description = 'Compress Project'
+    else:
+        project_name = project.name
+        author = project.author
+        project_description = project.remark
 
     # Vulnerabilities Info
     results = CobraResults.query.filter_by(task_id=task_id).all()

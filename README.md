@@ -1,12 +1,15 @@
 # Cobra
- [![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)](https://wufeifei.com/) [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://raw.githubusercontent.com/wufeifei/cobra/master/doc/COPYING)
- [![GitHub stars](https://img.shields.io/github/stars/wufeifei/cobra.svg?style=social&label=Star&maxAge=2592000)](https://github.com/wufeifei/cobra)
+ [![Cobra Release](https://img.shields.io/github/release/wufeifei/cobra.svg)]()
+ [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://raw.githubusercontent.com/wufeifei/cobra/master/doc/COPYING)
+ [![Cobra Open Issue](https://img.shields.io/github/issues-raw/wufeifei/cobra.svg)]()
+ [![Cobra Close Issue](https://img.shields.io/github/issues-closed-raw/wufeifei/cobra.svg)]()
+ [![GitHub stars](https://img.shields.io/github/stars/wufeifei/cobra.svg?style=social&label=Star)]()
  [![GitHub followers](https://img.shields.io/github/followers/wufeifei.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/wufeifei)
 
 Static code analysis common security issues and scan common security vulnerabilities
 
 ## 项目介绍
-眼镜蛇(Cobra)是一款定位于静态代码安全分析的工具，目标是为了找出源代码中存在的安全隐患或者漏洞。
+Cobra（眼镜蛇）是一款定位于静态代码安全漏洞分析系统。通过收集互联网常规漏洞的检测方法并输出成Cobra扫描规则，即可以自动化分析出源代码中存在的漏洞并生成完整的漏洞审计报告和详细的修复方案。
 
 ## 目标用户
 **1. 互联网企业**
@@ -20,7 +23,7 @@ Static code analysis common security issues and scan common security vulnerabili
 
 **3. 白帽**
 
-白帽们可以通过定制完善Cobra扫描规则, 对开源项目进行代码审计,发现其中漏洞.
+白帽们可以通过定制私有Cobra扫描规则, 对开源项目进行代码审计,发现其中漏洞.
 
 ## 应用场景
 
@@ -48,7 +51,8 @@ Static code analysis common security issues and scan common security vulnerabili
 ##### Cobra管理后台
 ![Cobra Manage](https://raw.githubusercontent.com/wufeifei/cobra/master/doc/MANAGE.png)
 
-## 引用链接
-- Homepage:  http://wufeifei.github.io/cobra
-- Documents: https://github.com/wufeifei/cobra/wiki
+## 相关链接
+- Cobra文档 - https://github.com/wufeifei/cobra/wiki
+- 建议意见 - https://github.com/wufeifei/cobra/issues/new
+- 在线试用 - 敬请期待!
 

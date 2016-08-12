@@ -11,8 +11,10 @@
 #
 # See the file 'doc/COPYING' for copying permission
 #
+import sys
 import datetime
-from app import db, CobraAuth
+import hashlib
+from utils import config, log
 
 
 def convert_timestamp(stamp):
@@ -47,7 +49,14 @@ def convert_number(number):
     return '{:20,}'.format(number)
 
 
-def verify_key(key):
-    """verify api key"""
-    auth = CobraAuth.query.filter_by(key=key).first()
-    return auth is not None
+def md5(content):
+    return hashlib.md5(content).hexdigest()
+
+
+def allowed_file(filename):
+    config_extension = config.Config('upload', 'extensions').value
+    if config_extension == '':
+        log.critical('Please set config file upload->directory')
+        sys.exit(0)
+    allowed_extensions = config_extension.split('|')
+    return '.' in filename and filename.rsplit('.', 1)[1] in allowed_extensions
