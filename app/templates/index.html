@@ -139,7 +139,7 @@
             </div><!-- End rab -->
             <div class="tab-pane" id="log">
                 <h3>Select compress file to upload</h3>
-                <div class="col-md-12" style="border-left: 1px solid #ddd;">
+                <div class="col-md-12">
                     <div class="box_style_2" id="dropbox">
                         <i class="icon-upload-cloud"></i>
                         <h4><span>Drag and Drop</span> File Uploading</h4>
@@ -252,12 +252,12 @@
                                     if (result.status == 1001) {
                                         if (result.result['status'] == 'done') {
                                             $('.tab-content').plainOverlay('hide');
-                                            alert("Report URL:" + result.result['report']);
+                                            window.open(result.result['report'], '_blank');
                                         } else {
                                             setTimeout(get_status, 3000);
                                         }
                                     } else {
-                                        alert(result.msg);
+                                        alert(result.result);
                                     }
                                 }
                             });
@@ -266,19 +266,18 @@
                         get_status();
                     } else {
                         $('.tab-content').plainOverlay('hide');
-                        alert(result.msg);
+                        alert(result.result);
                     }
                 }
             });
         });
-
         // Tab2
+        var process_bar = $('#progress .bar');
         $('#uploadFile').fileupload({
             url: '/api/upload',
             dataType: 'json',
             done: function (e, data) {
                 if (data.result.code == 1001) {
-                    $('.tab-content').plainOverlay('show');
                     var scan_id = data.result.result['scan_id'];
                     var data = {scan_id: scan_id, key: "{{ data.key }}"};
 
@@ -294,12 +293,13 @@
                                 if (result.status == 1001) {
                                     if (result.result['status'] == 'done') {
                                         $('.tab-content').plainOverlay('hide');
-                                        alert("Report URL:" + result.result['report']);
+                                        window.open(result.result['report'], '_blank');
+                                        process_bar.css('width', '0%');
                                     } else {
                                         setTimeout(get_status, 3000);
                                     }
                                 } else {
-                                    alert(result.msg);
+                                    alert(result.result);
                                 }
                             }
                         });
@@ -311,18 +311,19 @@
                 }
             },
             start: function (e) {
-                $('#progress .bar').css('width', '0%');
+                $('.tab-content').plainOverlay('show');
+                process_bar.css('width', '0%');
             },
             stop: function (e) {
-                $('#progress .bar').css('width', '0%');
+                process_bar.text('scanning...');
             },
             progressall: function (e, data) {
                 var progress = parseInt(data.loaded / data.total * 100, 10);
-                $('#progress .bar').css(
+                process_bar.css(
                         'width',
                         progress + '%'
                 );
-                $('#progress .bar').text(progress + '%');
+                process_bar.text('uploading(' + progress + '%)');
             }
         });
     });
