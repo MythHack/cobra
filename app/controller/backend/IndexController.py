@@ -1,14 +1,23 @@
-#!/usr/bin/env python2
-# coding: utf-8
-# file: IndexController.py
+# -*- coding: utf-8 -*-
 
+"""
+    backend.index
+    ~~~~~~~~~~~~~
+
+    Implements index controller
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import time
 
 from flask import redirect, request, session, escape, render_template
 
 from . import ADMIN_URL
 from app import web, db
-from app.CommonClass.ValidateClass import ValidateClass
+from app.CommonClass.ValidateClass import ValidateClass, login_required
 from app.models import CobraAdminUser
 
 
@@ -55,9 +64,7 @@ def index():
 
 # main view
 @web.route(ADMIN_URL + '/main', methods=['GET'])
+@login_required
 def main():
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + "/index")
-    else:
-        return render_template("backend/index/main.html")
+    return render_template("backend/index/main.html")
 

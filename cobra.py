@@ -1,23 +1,25 @@
 #!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    cobra
+    ~~~~~
+
+    Implements cobra main
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 from app import web, manager
-from utils import config
+from utils import log, config
 
 
 def main():
+    log.Log()
     debug = config.Config('cobra', 'debug').value
-    web.debug = bool(debug)
+    web.debug = int(debug)
     manager.run()
 
 

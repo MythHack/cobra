@@ -1,16 +1,16 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    utils.config
+    ~~~~~~~~~~~~
+
+    Implements config
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import os
 import ConfigParser
 

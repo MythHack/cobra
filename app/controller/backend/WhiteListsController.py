@@ -1,14 +1,23 @@
-#!/usr/bin/env python2
-# coding: utf-8
-# file: WhiteListsController.py
+# -*- coding: utf-8 -*-
 
+"""
+    backend.whitelist
+    ~~~~~~~~~~~~~~~~~
+
+    Implements whitelist controller
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import time
 
-from flask import redirect, jsonify, render_template, request
+from flask import jsonify, render_template, request
 
 from . import ADMIN_URL
 from app import web, db
-from app.CommonClass.ValidateClass import ValidateClass
+from app.CommonClass.ValidateClass import ValidateClass, login_required
 from app.models import CobraWhiteList, CobraRules, CobraProjects
 
 __author__ = "lightless"
@@ -17,13 +26,11 @@ __email__ = "root@lightless.me"
 
 # show all white lists
 @web.route(ADMIN_URL + '/whitelists/<int:page>', methods=['GET'])
+@login_required
 def whitelists(page):
 
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + '/index')
-
     per_page = 10
-    whitelists = CobraWhiteList.query.order_by('id desc').limit(per_page).offset((page - 1) * per_page).all()
+    whitelists = CobraWhiteList.query.order_by(CobraWhiteList.id.desc()).limit(per_page).offset((page - 1) * per_page).all()
     data = {
         'whitelists': whitelists,
     }
@@ -32,10 +39,8 @@ def whitelists(page):
 
 # add new white list
 @web.route(ADMIN_URL + '/add_whitelist', methods=['GET', 'POST'])
+@login_required
 def add_whitelist():
-
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + '/index')
 
     if request.method == 'POST':
 
@@ -67,10 +72,8 @@ def add_whitelist():
 
 # del the special white list
 @web.route(ADMIN_URL + '/del_whitelist', methods=['POST'])
+@login_required
 def del_whitelist():
-
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + '/index')
 
     vc = ValidateClass(request, "whitelist_id")
     ret, msg = vc.check_args()
@@ -88,10 +91,8 @@ def del_whitelist():
 
 # edit the special white list
 @web.route(ADMIN_URL + '/edit_whitelist/<int:whitelist_id>', methods=['GET', 'POST'])
+@login_required
 def edit_whitelist(whitelist_id):
-
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + '/index')
 
     if request.method == 'POST':
 

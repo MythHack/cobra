@@ -1,7 +1,16 @@
-#!/usr/bin/env python2
-# coding: utf-8
-# file: DashboardController.py
+# -*- coding: utf-8 -*-
 
+"""
+    backend.dashboard
+    ~~~~~~~~~~~~~~~~~
+
+    Implements dashboard controller
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import time
 import datetime
 
@@ -84,6 +93,8 @@ def dashboard():
     for x in all_vuls:  # all_vuls: results group by rule_id and count(*)
         t = {}
         # get vul name
+        if x.rule_id not in all_rules:
+            continue
         te = all_cobra_vuls[all_rules[x.rule_id]]
         # check if there is already a same vul name in different language
         flag = False
@@ -197,6 +208,8 @@ def graph_vulns():
             for x in all_vuls:  # all_vuls: results group by rule_id and count(*)
                 t = {}
                 # get vul name
+                if x.rule_id not in all_rules:
+                    continue
                 te = all_cobra_vuls[all_rules[x.rule_id]]
                 # check if there is already a same vul name in different language
                 flag = False
@@ -286,7 +299,11 @@ def graph_languages():
             return_value[res[1]] += res[0]
         else:
             return_value[res[1]] = res[0]
-
+    # 修改结果中的None为Unknown
+    try:
+        return_value.update(Unknown=return_value.pop(None))
+    except KeyError:
+        pass
     return jsonify(data=return_value)
 
 

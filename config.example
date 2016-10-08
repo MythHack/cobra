@@ -1,18 +1,11 @@
 [cobra]
-#
-# Domain
-#
-domain: cobra.wufeifei.com
+domain: 127.0.0.1
 
-#
 # 0.0.0.0   can bind any domain
 # 127.0.0.1 request localhost
-#
 host: 127.0.0.1
 
-#
 # default:80
-#
 port: 5000
 debug: 0
 
@@ -28,22 +21,27 @@ directory: /tmp/cobra
 extensions: tar.bz2|tar|gz|tgz|tar.gz|rar|zip
 max_size: 200
 
-#
-# Database
-#
+[third_party_vulnerabilities]
+# Push vulnerabilities to third vulnerabilities ?
+status: 0
+
+# Third vulnerabilities api url
+api:
+
+# Key
+key:
+
+[queue]
+broker:redis://:password@127.0.0.1:7890/4
+backend:redis://:password@127.0.0.1:7890/4
+
 [database]
 mysql: mysql+mysqldb://root:@127.0.0.1:3306/cobra
 
-#
-# Subversion Account
-#
 [svn]
 username:
 password:
 
-#
-# Git Account
-#
 [git]
 username:
 password:

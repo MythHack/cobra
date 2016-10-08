@@ -1,14 +1,22 @@
-#!/usr/bin/env python2
-# coding: utf-8
-# file: SearchController.py
+# -*- coding: utf-8 -*-
 
-from flask import request, render_template, jsonify, redirect
+"""
+    backend.search
+    ~~~~~~~~~~~~~~
+
+    Implements search controller
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
+from flask import request, render_template, jsonify
 
 from . import ADMIN_URL
 from app import web
-from app.CommonClass.ValidateClass import ValidateClass
+from app.CommonClass.ValidateClass import ValidateClass, login_required
 from app.models import CobraLanguages, CobraVuls, CobraRules
-
 
 __author__ = "lightless"
 __email__ = "root@lightless.me"
@@ -16,11 +24,8 @@ __email__ = "root@lightless.me"
 
 # search_rules_bar
 @web.route(ADMIN_URL + '/search_rules_bar', methods=['GET'])
+@login_required
 def search_rules_bar():
-
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + '/index')
-
     languages = CobraLanguages.query.all()
     vuls = CobraVuls.query.all()
 
@@ -34,19 +39,14 @@ def search_rules_bar():
 
 # search rules
 @web.route(ADMIN_URL + '/search_rules', methods=['POST'])
+@login_required
 def search_rules():
-
-    if not ValidateClass.check_login():
-        return redirect(ADMIN_URL + '/index')
-
     if request.method == 'POST':
 
         vc = ValidateClass(request, "language", "vul")
         ret, msg = vc.check_args()
         if not ret:
             return jsonify(tag="danger", msg=msg)
-
-        rules = None
 
         if vc.vars.language == 'all' and vc.vars.vul == 'all':
             rules = CobraRules.query.all()
@@ -84,4 +84,3 @@ def search_rules():
         }
 
         return render_template('backend/rule/rules.html', data=data)
-

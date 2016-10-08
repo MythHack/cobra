@@ -1,20 +1,22 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    pickup.subversion
+    ~~~~~~~~~~~~~~~~~
+
+    Implements various subversion methods
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import subprocess
 import sys
 import logging
-import ConfigParser
+from utils import config
+
+logging = logging.getLogger(__name__)
 
 
 class Subversion:
@@ -26,10 +28,8 @@ class Subversion:
         self.current_version = current_version
         self.online_version = online_version
 
-        config = ConfigParser.ConfigParser()
-        config.read('config')
-        self.username = config.get('svn', 'username')
-        self.password = config.get('svn', 'password')
+        self.username = config.Config('svn', 'username').value
+        self.password = config.Config('svn', 'password').value
 
         # Test SVN
         cmd = self.svn + " info --no-auth-cache --non-interactive --username='%s' --password='%s' %s" % (

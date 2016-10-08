@@ -1,20 +1,23 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    utils.common
+    ~~~~~~~~~~~~
+
+    Implements common helpers
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import sys
 import datetime
 import hashlib
-from utils import config, log
+import logging
+from utils import config
+
+logging = logging.getLogger(__name__)
 
 
 def convert_timestamp(stamp):
@@ -30,16 +33,17 @@ def convert_timestamp(stamp):
 def convert_time(seconds):
     """
     Seconds to minute/second
-    Ex: 61 -> 1'1''
+    Ex: 61 -> 1′1″
     :param seconds:
     :return:
+    :link: https://en.wikipedia.org/wiki/Prime_(symbol)
     """
     one_minute = 60
     minute = seconds / one_minute
     if minute == 0:
-        return str(seconds % one_minute) + "'"
+        return str(seconds % one_minute) + "″"
     else:
-        return str(minute) + "''" + str(seconds % one_minute) + "'"
+        return str(minute) + "′" + str(seconds % one_minute) + "″"
 
 
 def convert_number(number):
@@ -73,7 +77,7 @@ def allowed_file(filename):
     """
     config_extension = config.Config('upload', 'extensions').value
     if config_extension == '':
-        log.critical('Please set config file upload->directory')
+        logging.critical('Please set config file upload->directory')
         sys.exit(0)
     allowed_extensions = config_extension.split('|')
     return '.' in filename and filename.rsplit('.', 1)[1] in allowed_extensions

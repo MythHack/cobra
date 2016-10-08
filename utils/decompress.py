@@ -1,23 +1,25 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    utils.decompress
+    ~~~~~~~~~~~~~~~~
+
+    Implements decompress file
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import os
 import shutil
 import zipfile
 import tarfile
 import rarfile
+import logging
 from utils import config
 
+logging = logging.getLogger(__name__)
 """example
 
 Decompress a compressed file.
@@ -65,10 +67,11 @@ class Decompress:
             msg: None or error message
             dir_name: decompressed directory name. Usually, the directory name is the filename without file extension.
         """
+
         if '.zip' in self.filename:
-            return self.__decompress_zip(), os.path.join(self.upload_directory, self.dir_name)
+            return self.__decompress_zip(), self.get_real_directory()
         elif '.rar' in self.filename:
-            return self.__decompress_rar(), os.path.join(self.upload_directory, self.dir_name)
+            return self.__decompress_rar(), self.get_real_directory()
         elif '.tgz' in self.filename or '.tar' in self.filename or '.gz' in self.filename:
             """
             Support Tar Extension
@@ -76,9 +79,28 @@ class Decompress:
             .gz
             .tgz
             """
-            return self.__decompress_tar_gz(), os.path.join(self.upload_directory, self.dir_name)
+            return self.__decompress_tar_gz(), self.get_real_directory()
         else:
             return False, 'File type error, only zip, rar, tar.gz accepted.'
+
+    def get_real_directory(self):
+        """
+        get real directory
+        /path/project-v1.2/project-v1.2 -> /path/project-v1.2/
+        :param:
+        :return:
+        """
+        directory = os.path.join(self.upload_directory, self.dir_name)
+        file_count = 0
+        directory_path = None
+        for filename in os.listdir(directory):
+            directory_path = os.path.join(directory, filename)
+            file_count += 1
+        logging.info("Decompress path count: {0}, directory path: {1}".format(file_count, directory_path))
+        if file_count == 1 and os.path.isdir(directory_path):
+            return directory_path
+        else:
+            return directory
 
     def __decompress_zip(self):
         """unzip a file."""
