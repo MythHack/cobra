@@ -6,10 +6,10 @@
 
     Implements various directory
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import time
 import os
@@ -34,15 +34,15 @@ class Directory:
         for filename in os.listdir(directory):
             path = os.path.join(directory, filename)
 
-            # Statistic File Type Count
-            file_name, file_extension = os.path.splitext(path)
-            self.type_nums.setdefault(file_extension.lower(), []).append(filename)
-
             # Directory Structure
             # logging.debug('|  ' * (level - 1) + '|--' + filename)
             if os.path.isdir(path):
                 self.files(path, level + 1)
             if os.path.isfile(path):
+                # Statistic File Type Count
+                file_name, file_extension = os.path.splitext(path)
+                self.type_nums.setdefault(file_extension.lower(), []).append(filename)
+
                 path = path.replace(self.path, '')
                 self.file.append(path)
                 self.file_id += 1

@@ -7,10 +7,10 @@
 
     Implements scan
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import os
 import time
@@ -55,7 +55,7 @@ class Scan:
         if not p:
             # insert into project table.
             repo_name = directory.split('/')[-1]
-            project = CobraProjects(directory, '', repo_name, 'Upload', project_framework, '', '', current_time)
+            project = CobraProjects(directory, '', repo_name, 'Upload', project_framework, '', '', 1, current_time)
             db.session.add(project)
             db.session.commit()
             project_id = project.id
@@ -99,8 +99,9 @@ class Scan:
             repo_name = gg.repo_name
             repo_directory = gg.repo_directory
             # Git Clone Error
-            if gg.clone() is False:
-                return 4001, 'Clone Failed'
+            clone_ret, clone_err = gg.clone()
+            if clone_ret is False:
+                return 4001, 'Clone Failed ({0})'.format(clone_err)
         elif 'svn' in self.target:
             # SVN
             repo_name = 'mogujie'
@@ -111,7 +112,7 @@ class Scan:
             repo_author = getpass.getuser()
             repo_directory = self.target
             if not os.path.exists(repo_directory):
-                return 1004, 'Repo_directory Not Found'
+                return 1004, 'repo directory not exist ({0})'.format(repo_directory)
 
         if new_version == "" or old_version == "":
             scan_way = 1
@@ -133,7 +134,7 @@ class Scan:
         project_id = 0
         if not p:
             # insert into project table.
-            project = CobraProjects(self.target, '', repo_name, repo_author, project_framework, '', '', current_time)
+            project = CobraProjects(self.target, '', repo_name, repo_author, project_framework, '', '', 1, current_time)
         else:
             project_id = p.id
             # update project's framework
@@ -149,12 +150,12 @@ class Scan:
             cobra_path = os.path.join(config.Config().project_directory, 'cobra.py')
 
             if os.path.isfile(cobra_path) is not True:
-                return 1004, 'Cobra Not Found'
-            # 扫描漏洞
+                return 1004, 'cobra.py not found'
+            # scan vulnerability
             subprocess.Popen(['python', cobra_path, "scan", "-p", str(project_id), "-i", str(task.id), "-t", repo_directory])
-            # 统计代码行数
+            # statistic code
             subprocess.Popen(['python', cobra_path, "statistic", "-i", str(task.id), "-t", repo_directory])
-            # 检测漏洞修复状况
+            # check repair
             subprocess.Popen(['python', cobra_path, "repair", "-p", str(project_id)])
             result = dict()
             result['scan_id'] = task.id

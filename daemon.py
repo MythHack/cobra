@@ -4,16 +4,15 @@
     daemon
     ~~~~~~
 
-    实现异步队列推送系统
-    - 第三方漏洞管理平台
+    Implement Asynchronous Queue Push System
+    - Third-party vulnerability manage system
 
-    使用需要先启用队列服务
     celery -A daemon worker --loglevel=info
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import logging
 from celery import Celery

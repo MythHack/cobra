@@ -6,10 +6,10 @@
 
     Implements languages controller
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 from flask import request, jsonify, render_template, redirect
 
@@ -47,13 +47,14 @@ def add_new_language():
         return render_template("backend/language/add_new_language.html")
 
 
-@web.route(ADMIN_URL + "/languages", methods=['GET'])
-def languages():
+@web.route(ADMIN_URL + "/languages/<int:page>", methods=['GET'])
+def languages(page):
 
     if not ValidateClass.check_login():
         return redirect(ADMIN_URL + "/index")
 
-    languages = CobraLanguages.query.order_by(CobraLanguages.id.desc()).all()
+    per_page = 10
+    languages = CobraLanguages.query.order_by(CobraLanguages.id.desc()).limit(per_page).offset((page - 1) * per_page).all()
     data = {
         'languages': languages,
     }

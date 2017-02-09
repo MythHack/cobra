@@ -7,10 +7,10 @@
 
     Implements static code analyse
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import os
 import sys
@@ -225,6 +225,7 @@ class Static:
                             'project_id': self.project_id,
                             'project_directory': self.directory,
                             'rule_id': rule.id,
+                            'result_id': None,
                             'file_path': file_path,
                             'line_number': line_number,
                             'code_content': code_content,

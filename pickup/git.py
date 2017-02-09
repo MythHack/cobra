@@ -6,13 +6,14 @@
 
     Implements various git methods
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 
 import os
+import re
 import subprocess
 import logging
 from urllib import quote
@@ -102,10 +103,6 @@ class Git:
         repo_name = self.repo_address.split('/')[-1].replace('.git', '')
         self.repo_author = repo_user
         self.repo_name = repo_name
-        if '.git' not in self.repo_address:
-            self.repo_address += '.git'
-        else:
-            repo_name = repo_name.split('.')[0]
 
         self.repo_directory = os.path.join(os.path.join(self.upload_directory, repo_user), repo_name)
 
@@ -116,29 +113,29 @@ class Git:
         logging.info('Start Pull Repo...')
 
         if not self.__check_exist():
-            logging.info('No local repo exist. Please clone first.')
-            return False
+            return False, 'No local repo exist. Please clone first.'
 
         # change work directory to the repo
         repo_dir = self.repo_directory
         logging.debug('cd directory: {0}'.format(repo_dir))
         os.chdir(repo_dir)
 
-        cmd = 'git pull'
+        cmd = 'git pull origin master'
         p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         (pull_out, pull_err) = p.communicate()
         logging.info(pull_out)
         logging.info(pull_err)
+
+        pull_err = pull_err.replace('{0}:{1}'.format(self.repo_username, self.repo_password), '')
 
         # change work directory back.
         os.chdir(repo_dir)
 
         if 'Updating' in pull_out or 'up-to-date' in pull_out:
             logging.info('Pull done.')
-            return True
+            return True, None
         else:
-            logging.info('Pull failed')
-            return False
+            return False, pull_err
 
     def clone(self):
         """Clone a repo from repo_address
@@ -163,7 +160,6 @@ class Git:
         # "http[s]://username:password@gitlab.com/username/reponame"
         # !!! if add password in the url, .git/config will log your url with password
         cmd = 'git clone ' + clone_address + ' "' + self.repo_directory + '" -b master'
-        logging.info(cmd)
 
         p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         (clone_out, clone_err) = p.communicate()
@@ -171,23 +167,20 @@ class Git:
         logging.info(clone_err)
 
         if 'not found' in clone_err or 'Not found' in clone_err:
-            logging.info("repo doesn't exist.")
-            return False
+            return False, 'repo doesn\'t exist.'
         elif 'already exists' in clone_err:
-            logging.info("repo has already cloned.")
-            return False
+            return False, 'repo has already cloned.'
         elif 'Authentication failed' in clone_err:
-            logging.info("Authentication failed.")
-            return False
+            return False, 'Authentication failed.'
+
+        clone_err = clone_err.replace('{0}:{1}'.format(self.repo_username, self.repo_password), '')
 
         logging.info('clone done. Switching to branch ' + self.repo_branch)
         # check out to special branch
         if self.checkout(self.repo_branch):
-            logging.info('checkout success.')
-            return True
+            return True, None
         else:
-            logging.info('checkout failed.')
-            return False
+            return False, clone_err
 
     def diff(self, new_version, old_version, raw_output=False):
         """
@@ -294,5 +287,36 @@ class Git:
         else:
             return self.clone()
 
+    @staticmethod
+    def committer(file, path, line_number, length=1):
+        """
+        git blame -L21,+1 -- git.py
+        362d5798 (wufeifei 2016-09-10 12:19:44 +0800 21) logging = logging.getLogger(__name__)
+        (?:.{8}\s\()(.*)\s(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})
+        group #1: wufeifei
+        group #2: 2016-09-10 12:19:44
+        :param file:
+        :param path:
+        :param line_number:
+        :param length:
+        :return: group#1, group#2
+        """
+        os.chdir(path)
+        cmd = "git blame -L{0},+{1} -- {2}".format(line_number, length, file)
+        p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        (checkout_out, checkout_err) = p.communicate()
+        logging.info(checkout_err)
+        if len(checkout_out) != 0:
+            group = re.findall(r'(?:.{8}\s\()(.*)\s(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})', checkout_out)
+            return True, group[0][0], group[0][1]
+        else:
+            return False, None, None
+
     def __repr__(self):
         return "<Git - %r@%r>" % (self.repo_username, self.repo_address)
+
+
+if __name__ == '__main__':
+    # test committer
+    c_ret, c_author, c_time = Git.committer('cobra.py', '/Volumes/Statics/Project/Company/cobra/', 11)
+    print(c_ret, c_author, c_time)

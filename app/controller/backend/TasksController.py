@@ -6,10 +6,10 @@
 
     Implements tasks controller
 
-    :author:    Feei <wufeifei#wufeifei.com>
+    :author:    Feei <feei#feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
-    :copyright: Copyright (c) 2016 Feei. All rights reserved
+    :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import datetime
 
@@ -20,30 +20,47 @@ from . import ADMIN_URL
 from app import web, db
 from app.CommonClass.ValidateClass import ValidateClass, login_required
 from app.models import CobraTaskInfo
-from utils import config
+from utils.common import convert_number, convert_time
 
 __author__ = "lightless"
 __email__ = "root@lightless.me"
 
 
 # show all tasks
-@web.route(ADMIN_URL + '/tasks/<int:page>', methods=['GET'])
+@web.route(ADMIN_URL + '/tasks/', methods=['GET'], defaults={'keyword': '0', 'page': 1})
+@web.route(ADMIN_URL + '/tasks/<int:page>', methods=['GET'], defaults={'keyword': '0'})
+@web.route(ADMIN_URL + '/tasks/<int:page>/<keyword>', methods=['GET'])
 @login_required
-def tasks(page):
+def tasks(page, keyword):
+    if keyword != '0':
+        filter_group = (CobraTaskInfo.target.like("%{}%".format(keyword)))
+    else:
+        filter_group = (CobraTaskInfo.id > 0)
     per_page = 10
-    tasks = CobraTaskInfo.query.order_by(CobraTaskInfo.id.desc()).limit(per_page).offset((page - 1) * per_page).all()
+    all_tasks = CobraTaskInfo.query.filter(filter_group).order_by(CobraTaskInfo.id.desc()).limit(per_page).offset((page - 1) * per_page).all()
 
-    # replace data
-    for task in tasks:
-        task.scan_way = "Full Scan" if task.scan_way == 1 else "Diff Scan"
+    total = CobraTaskInfo.query.filter(filter_group).count()
+
+    for task in all_tasks:
+        task.file_count = convert_number(task.file_count)
+        task.code_number = convert_number(task.code_number) if task.code_number != 0 else u"统计中..."
+        task.time_start = datetime.datetime.fromtimestamp(task.time_start)
+        task.time_end = datetime.datetime.fromtimestamp(task.time_end)
+        task.time_consume = convert_time(task.time_consume)
+
+    if keyword == '0':
+        keyword = ''
     data = {
-        'tasks': tasks,
+        'total': total,
+        'tasks': all_tasks,
+        'page': page,
+        'keyword': keyword
     }
     return render_template('backend/task/tasks.html', data=data)
 
 
 # del the special task
-@web.route(ADMIN_URL + '/del_task', methods=['POST'])
+@web.route(ADMIN_URL + '/tasks/del', methods=['POST'])
 @login_required
 def del_task():
     vc = ValidateClass(request, "id")
@@ -55,55 +72,29 @@ def del_task():
     try:
         db.session.delete(task)
         db.session.commit()
-        return jsonify(tag='success', msg='delete success.')
+        return jsonify(code=1001, message='delete success.')
     except SQLAlchemyError as e:
         print(e)
-        return jsonify(tag='danger', msg='unknown error.')
+        return jsonify(code=4004, message='unknown error.')
 
 
-# edit the special task
-@web.route(ADMIN_URL + '/edit_task/<int:task_id>', methods=['GET', 'POST'])
+@web.route(ADMIN_URL + "/tasks/search/<keyword>", methods=['GET'])
 @login_required
-def edit_task(task_id):
-    if request.method == 'POST':
-
-        # vc = ValidateClass(request, "branch", "scan_way", "new_version", "old_version", "target")
-        # ret, msg = vc.check_args()
-        # if not ret:
-        #     return jsonify(tag="danger", msg=msg)
-        # TODO: check new_version and old_version when scan_way == 2
-        branch = request.form.get('branch')
-        scan_way = request.form.get('scan_way')
-        new_version = request.form.get('new_version')
-        old_version = request.form.get('old_version')
-        target = request.form.get('target')
-
-        if not branch or branch == "":
-            return jsonify(tag='danger', msg='branch can not be empty')
-        if not scan_way or scan_way == "":
-            return jsonify(tag='danger', msg='scan way can not be empty')
-        if (scan_way == 2) and ((not new_version or new_version == "") or (not old_version or old_version == "")):
-            return jsonify(tag='danger', msg='In diff scan mode, new version and old version can not be empty')
-        if not target or target == "":
-            return jsonify(tag='danger', msg='Target can not be empty.')
-
-        task = CobraTaskInfo.query.filter_by(id=task_id).first()
-        task.branch = branch
-        task.scan_way = scan_way
-        task.new_version = new_version
-        task.old_version = old_version
-        task.target = target
-        task.updated_time = datetime.datetime.now()
-
-        try:
-            db.session.add(task)
-            db.session.commit()
-            return jsonify(tag='success', msg='save success.')
-        except SQLAlchemyError as e:
-            print(e)
-            return jsonify(tag='danger', msg='save failed. Try again later?')
+def search_task(keyword):
+    if keyword == "":
+        return render_template("backend/task/tasks.html", data=None)
     else:
-        task = CobraTaskInfo.query.filter_by(id=task_id).first()
-        return render_template('backend/task/edit_task.html', data={
-            'task': task,
-        })
+        all_tasks = CobraTaskInfo.query.filter(CobraTaskInfo.target.like("%{}%".format(keyword))).all()
+        # 转换一些数据
+        for task in all_tasks:
+            task.file_count = convert_number(task.file_count)
+            task.code_number = convert_number(task.code_number) if task.code_number != 0 else u"统计中..."
+            task.time_start = datetime.datetime.fromtimestamp(task.time_start)
+            task.time_end = datetime.datetime.fromtimestamp(task.time_end)
+            task.time_consume = convert_time(task.time_consume)
+
+        data = {
+            'tasks': all_tasks,
+            'keyword': keyword
+        }
+        return render_template('backend/task/tasks.html', data=data)
