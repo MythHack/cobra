@@ -1,4 +1,7 @@
-Rename **config.example** in the Cobra root directory to **config**.
+Copy **config.example** to *config* in the Cobra root directory.
+```bash
+cp config.example config 
+```
 
 ```
 [cobra]
@@ -64,6 +67,15 @@ backend:redis://:password@127.0.0.1:7890/4
 #
 [database]
 mysql: mysql+mysqldb://root:yourpassword@127.0.0.1:3306/cobra
+
+[email]
+host:
+port:
+user:
+password:
+
+[report]
+to:
 
 #
 # SVN account

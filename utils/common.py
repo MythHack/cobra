@@ -6,7 +6,7 @@
 
     Implements common helpers
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -14,20 +14,10 @@
 import sys
 import datetime
 import hashlib
-import logging
 from utils import config
+from utils.log import logging
 
 logging = logging.getLogger(__name__)
-
-
-def convert_timestamp(stamp):
-    """returns a datetime.date object off a timestamp"""
-    # Really, this should be implemented using time.strptime()
-    date_shards = stamp.split()
-    date_shards = date_shards[0].split('-')
-    date_shards = [x.lstrip('0') for x in date_shards]
-    processed_date = datetime.date(int(date_shards[0]), int(date_shards[1]), int(date_shards[2]))
-    return processed_date
 
 
 def convert_time(seconds):
@@ -56,7 +46,7 @@ def convert_number(number):
     if number is None or number == 0:
         return 0
     number = int(number)
-    return '{:20,}'.format(number)
+    return '{:20,}'.format(number).strip()
 
 
 def md5(content):

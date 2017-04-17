@@ -6,7 +6,7 @@
 
     Implements various file
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -14,7 +14,7 @@
 import subprocess
 
 
-class File:
+class File(object):
     def __init__(self, file_path):
         self.file_path = file_path
 

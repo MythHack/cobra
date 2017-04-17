@@ -6,7 +6,7 @@
 
     Implements config
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -16,7 +16,7 @@ import StringIO
 import ConfigParser
 
 
-class Config:
+class Config(object):
     def __init__(self, level1=None, level2=None):
         self.level1 = level1
         self.level2 = level2

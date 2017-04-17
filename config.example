@@ -1,5 +1,5 @@
 [cobra]
-domain: 127.0.0.1
+domain: 127.0.0.1:5000
 
 # 0.0.0.0   can bind any domain
 # 127.0.0.1 request localhost
@@ -37,6 +37,15 @@ backend:redis://:password@127.0.0.1:7890/4
 
 [database]
 mysql: mysql+mysqldb://root:@127.0.0.1:3306/cobra
+
+[email]
+host:
+port:
+user:
+password:
+
+[report]
+to:
 
 [svn]
 username:

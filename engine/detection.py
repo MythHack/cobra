@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -7,18 +6,18 @@
 
     Implements framework detection
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import os
-import logging
+from utils.log import logging
 
 logging = logging.getLogger(__name__)
 
 
-class Detection:
+class Detection(object):
     def __init__(self, project_directory=None):
         self.project_directory = project_directory
         self.rules = [
@@ -106,15 +105,14 @@ class Detection:
         :return: self.rules['name']
         """
         for rule in self.rules:
-            logging.info("Name: {0} Site: {1} Source: {2}".format(rule['name'], rule['site'], rule['source']))
             rules_types = ['file', 'directory']
             rules_count = len(rule['rules'])
             rules_completed = 0
-            logging.info('Rules Count: {0} Rules Info: {1}'.format(rules_count, rule['rules']))
+            logging.info("------ {0} (C: {1})".format(rule['name'], rules_count))
             for rule_type in rules_types:
                 if rule_type in rule['rules']:
                     target = os.path.join(self.project_directory, rule['rules'][rule_type])
-                    logging.debug('Detection({0}): {1}'.format(rule_type, target))
+                    logging.debug('{0}: {1}'.format(rule_type, target))
                     if rule_type == 'file':
                         if os.path.isfile(target):
                             rules_completed += 1

@@ -108,34 +108,173 @@
             <label for="regex-repair">Regex repair</label>
             <textarea class="form-control" id="regex-repair">{{ data.rule.regex_repair }}</textarea>
         </div>
-        <div class="aon hn">
-            <label for="repair">Verify <a href="http://cobra-docs.readthedocs.io/en/latest/rule/" target="_blank">
+        <div class="aon hn verify_form">
+            <label for="repair">Verify TestCase <a href="http://cobra-docs.readthedocs.io/en/latest/rule/" target="_blank">
                 <span class="bv abu" data-toggle="tooltip" data-placement="right" data-container="body" data-original-title="Click view rule verify detail"></span></a></label>
-            <textarea class="form-control" rows="6" id="verify">{{ data.rule.verify }}</textarea>
+            <textarea class="form-control" rows="6" id="verify" placeholder="Matched1
+***
+Matched2
+---
+Not matched1
+***
+Not matched2">{{ data.rule.verify }}</textarea>
+        </div>
+        <div class="aon hn repair_form">
+            <label for="repair">Repair Editor</label>
+            <textarea class="form-control" rows="8" id="repair">{{ data.rule.repair }}</textarea>
         </div>
         <div class="aon hn">
-            <label for="repair">Repair</label>
-            <textarea class="form-control" rows="4" id="repair">{{ data.rule.repair }}</textarea>
+            <label for="preview">Repair Preview</label>
+            <div id="preview"></div>
         </div>
         <hr class="aky">
         <div class="aon hj akg">
             <div class="akh aki">
-                <button type="button" name="submit" class="ce apk fh">Edit</button>
+                <button type="button" name="submit" class="ce apk fh">Save</button>
             </div>
             <div class="akh">
+                {#                <a class="ce apk fl" href="#ruleRunModal" data-toggle="modal" style="margin-right:10px;">Run</a>#}
+                <a class="ce apk fi" href="#ruleTestModal" data-toggle="modal" style="margin-right:10px;">Test</a>
                 <button class="ce fh apr delete-rule" type="button">
                     <span class="bv xm"></span> Delete
                 </button>
             </div>
         </div>
     </form>
+
+    <div id="ruleRunModal" class="cb fade" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="ri">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Rule Run</h4>
+                </div>
+                <div class="modal-body">
+                    <p>You're looking at an example modal in the dashboard theme.</p>
+                </div>
+                <div class="rj">
+                    <button type="button" class="ce fh" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ruleTestModal" class="cb fade" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="ri">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Rule Test</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Test this rule veracity.</p>
+                    <div class="form-group">
+                        <select class="project" style="width: 100%;">
+                            <option value="0">All Project</option>
+                            {% for item in data.projects %}
+                                <option value="{{ item.id }}">{{ item.name }} ({{ item.repository }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <pre id="test_log" style="min-height: 400px;color: #000;border:1px solid #ec971f;margin-top: 20px;"></pre>
+                </div>
+                <div class="rj">
+                    <button type="button" name="start" class="ce fl" data-dismiss="modal">Start</button>
+                    <button type="button" class="ce fi" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block scripts %}
+    <link href="{{ url_for('static', filename='css/select2.min.css') }}" rel="stylesheet">
+    <style>
+        .select2-results__option {
+            color: black;
+        }
+
+        .verify_form .CodeMirror {
+            height: 200px;
+        }
+
+        .repair_form .CodeMirror {
+            height: auto;
+        }
+
+        .modal-body .CodeMirror {
+            height: 600px !important;
+        }
+
+        .verify-status {
+            width: 1em;
+        }
+
+        #preview {
+            width: 100%;
+            min-height: 20px;
+            border: 1px solid #464646;
+            padding: 10px;
+        }
+    </style>
+    <script src="{{ url_for('static', filename='js/select2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/lib/codemirror.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/lib/codemirror.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/theme/material.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/addon/fold/foldgutter.css') }}">
+    <script src="{{ url_for('static', filename='codemirror/addon/fold/foldcode.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/addon/fold/foldgutter.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/addon/fold/markdown-fold.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/addon/display/placeholder.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/mode/markdown/markdown.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/mode/javascript/javascript.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/mode/css/css.js') }}"></script>
+    <script src="{{ url_for('static', filename='codemirror/mode/htmlmixed/htmlmixed.js') }}"></script>
     <script>
         var app = {
             id: $('input[name=id]').val(),
             type: $('input[name=type]').val(),
+            pid: function () {
+                return $('select.project').val();
+            },
+            marker: function (status) {
+                var marker = document.createElement("div");
+                marker.style.color = status == 'False' ? '#d4333f' : 'green';
+                marker.style.paddingLeft = '0.3em';
+                marker.innerHTML = "●";
+                return marker;
+            },
             init: function () {
+                // Rule verify
+                var cm_verify = CodeMirror.fromTextArea(document.getElementById("verify"), {
+                    mode: 'markdown',
+                    theme: 'material',
+                    lineNumbers: true,
+                    gutters: ["CodeMirror-linenumbers", 'verify-status']
+                });
+                var doc = cm_verify.getDoc();
+                {% for line, status in data.verify.iteritems() %}
+                    doc.setGutterMarker({{ line }}, 'verify-status', app.marker('{{ status }}'));
+                {% endfor %}
+
+                // Repair
+                var delay;
+                // Initialize CodeMirror editor with a nice html5 canvas demo.
+                var cm_repair = CodeMirror.fromTextArea(document.getElementById('repair'), {
+                    mode: 'text/html',
+                    theme: 'material',
+                    lineNumbers: true,
+                    gutters: ["CodeMirror-linenumbers"]
+                });
+                cm_repair.on("change", function () {
+                    clearTimeout(delay);
+                    delay = setTimeout(updatePreview, 300);
+                });
+                function updatePreview() {
+                    $('#preview').html(cm_repair.getValue());
+                }
+
+                setTimeout(updatePreview, 300);
+
+
                 $("button[name=submit]").click(function () {
                     var type = $('input[name=type]').val();
                     var id = $('input[name=id]').val();
@@ -145,15 +284,15 @@
                     var description = $('input[name=name]').val();
                     var regex_repair = $("#regex-repair").val();
                     var block_repair = $('input[name=repair-block]:checked').val();
-                    var repair = $("#repair").val();
-                    var verify = $("#verify").val();
+                    var repair = cm_repair.getValue();
+                    var verify = cm_verify.getValue();
                     var author = $('input[name=author]').val();
                     var status = $('input[name=status]:checked').val();
                     var level = $('input[name=level]:checked').val();
 
                     // check data
                     if (!vul_type || vul_type == "") {
-                        notification('vul type error.');
+                        notification('vulnerability type error.');
                         return false;
                     }
                     if (!lang || lang == "") {
@@ -210,7 +349,7 @@
                     };
                     $.post('/admin/rules/' + type + '/' + id, data, function (res) {
                         if (res.code == 1001) {
-                            window.history.go(-1);
+                            notification(res.message);
                         } else {
                             notification(res.message);
                         }
@@ -231,6 +370,37 @@
                                 alert(result.message);
                             }
                         });
+                    }
+                });
+
+                // Rule Test
+                $(".project").select2({
+                    placeholder: 'Select test project'
+                });
+
+                $('button[name=start]').click(function (e) {
+                    e.preventDefault();
+                    if (window.confirm("Start test this rule? (RID: " + app.id + " PID：" + app.pid() + ")")) {
+                        $('button[name=start]').attr('disabled', true);
+                        $('#test_log').text('Scanning...');
+                        $.post("/admin/rules/test/", {"rid": app.id, 'pid': app.pid()}, function (result) {
+                            $('button[name=start]').attr('disabled', false);
+                            if (result.code == 1001) {
+                                $('#test_log').text('');
+                                var test_log = CodeMirror(document.getElementById("test_log"), {
+                                    value: result.message,
+                                    mode: 'markdown',
+                                    theme: 'material',
+                                    readOnly: true
+                                });
+                            } else {
+                                alert(result.message);
+                            }
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            $('button[name=start]').attr('disabled', false);
+                            alert("Server error: " + errorThrown);
+                        });
+                        return false;
                     }
                 });
             }

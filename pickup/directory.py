@@ -6,20 +6,21 @@
 
     Implements various directory
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import time
 import os
-import logging
-from app import db, CobraExt
+from utils.log import logging
+from app.models import CobraExt
+from app import db
 
 logging = logging.getLogger(__name__)
 
 
-class Directory:
+class Directory(object):
     def __init__(self, path):
         self.path = path
 

@@ -19,6 +19,7 @@
                 <a type="button" href="?tt=w" class="ce apn {% if data.time_type == 'w' %}active{% endif %}">周报(Weekly)</a>
                 <a type="button" href="?tt=m" class="ce apn {% if data.time_type == 'm' %}active{% endif %}">月报(Monthly)</a>
                 <a type="button" href="?tt=q" class="ce apn {% if data.time_type == 'q' %}active{% endif %}">季报(Quarterly)</a>
+                <a type="button" href="?tt=a" class="ce apn {% if data.time_type == 'a' %}active{% endif %}">全部(All)</a>
             </div>
         </div>
     </div>
@@ -48,31 +49,33 @@
             <span class="anj">全部(Total)</span>
         </div>
     </div>
+    <blockquote>{{ data.comment.vulnerability }}</blockquote>
     <div class="fu chart" id="chart_vt" style="height:400px;margin-bottom: 20px;">
 
     </div>
-    <div class="fu chart" id="chart_vdd" style="height:500px;">
-
-    </div>
+    {#    <div class="fu chart" id="chart_vdd" style="height:500px;">#}
+    {##}
+    {#    </div>#}
     <div class="fu chart" id="chart_vtd" style="height:500px;">
 
     </div>
     <div class="anv alg ala">
         <h3 class="anw anx">扫描数据(Scan data)</h3>
     </div>
-
+    <blockquote>{{ data.comment.scan }}</blockquote>
     <div class="fu apt">
         <div class="gq gs ala">
             <div class="apu ano">
                 <div class="alz">
                     <span class="anj">项目数(Projects)</span>
                     <h2 class="ani">
-                        {{ data.amount.projects }}
-                        <small class="ank anl">0.0%</small>
+                        {{ data.amount.scan.projects.time_type }}
+                        <small class="ank anl">Total: {{ data.amount.scan.projects.total }}</small>
                     </h2>
                     <hr class="ans akt">
                 </div>
-                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[28,68,41,43,96,45,100]}]" data-labels="['a','b','c','d','e','f','g']" style="width: 189px; height: 47px;"></canvas>
+                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[{% for x in data.trend.scan.project %}{{ x }},{% endfor %}]}]" data-labels="['a','b','c','d','e','f','g','i']"
+                        style="width: 189px; height: 47px;"></canvas>
             </div>
         </div>
         <div class="gq gs ala">
@@ -80,12 +83,13 @@
                 <div class="alz">
                     <span class="anj">任务数(Tasks)</span>
                     <h2 class="ani">
-                        {{ data.amount.tasks }}
-                        <small class="ank anm">0.0%</small>
+                        {{ data.amount.scan.tasks.time_type }}
+                        <small class="ank anm">Total: {{ data.amount.scan.tasks.total }}</small>
                     </h2>
                     <hr class="ans akt">
                 </div>
-                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[4,34,64,27,96,50,80]}]" data-labels="['a', 'b','c','d','e','f','g']" style="width: 189px; height: 47px;"></canvas>
+                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[{% for x in data.trend.scan.task %}{{ x }},{% endfor %}]}]" data-labels="['a', 'b','c','d','e','f','g','i']"
+                        style="width: 189px; height: 47px;"></canvas>
             </div>
         </div>
         <div class="gq gs ala">
@@ -93,12 +97,13 @@
                 <div class="alz">
                     <span class="anj">文件数(Files)</span>
                     <h2 class="ani">
-                        {{ data.amount.files }}
-                        <small class="ank anl">0.0%</small>
+                        {{ data.amount.scan.files.time_type }}
+                        <small class="ank anl">Total: {{ data.amount.scan.files.total }}</small>
                     </h2>
                     <hr class="ans akt">
                 </div>
-                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[12,38,32,60,36,54,68]}]" data-labels="['a', 'b','c','d','e','f','g']" style="width: 189px; height: 47px;"></canvas>
+                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[{% for x in data.trend.scan.file %}{{ x }},{% endfor %}]}]" data-labels="['a', 'b','c','d','e','f','g','i']"
+                        style="width: 189px; height: 47px;"></canvas>
             </div>
         </div>
         <div class="gq gs ala">
@@ -106,39 +111,57 @@
                 <div class="alz">
                     <span class="anj">代码行数(Lines)</span>
                     <h2 class="ani">
-                        {{ data.amount.lines }}
-                        <small class="ank anm">0.0%</small>
+                        {{ data.amount.scan.lines.time_type }}
+                        <small class="ank anm">Total: {{ data.amount.scan.lines.total }}</small>
                     </h2>
                     <hr class="ans akt">
                 </div>
-                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[43,48,52,58,50,95,100]}]" data-labels="['a', 'b','c','d','e','f','g']" style="width: 189px; height: 47px;"></canvas>
+                <canvas id="sparkline1" width="378" height="94" class="apv" data-chart="spark-line" data-value="[{data:[{% for x in data.trend.scan.line %}{{ x }},{% endfor %}]}]" data-labels="['a', 'b','c','d','e','f','g','i']"
+                        style="width: 189px; height: 47px;"></canvas>
             </div>
         </div>
     </div>
     <div class="anv alg ala">
         <h3 class="anw anx">规则数据(Rule data)</h3>
     </div>
+    <blockquote>{{ data.comment.rule }}</blockquote>
     <div class="fu apt alg ala ta te">
         <div class="gh gi apu ala">
             <h3 class="ani dm">
-                {{ data.amount.rules_on }}
-                <small class="ank anl">0.0%</small>
+                {{ data.amount.rule.on.total }}
+                <small class="ank anl">{{ data.amount.rule.on.time_type }}</small>
             </h3>
             <span class="anj">开启(ON)</span>
         </div>
         <div class="gh gi apu ala">
             <h3 class="ani dj">
-                {{ data.amount.rules_off }}
-                <small class="ank anm">0.0%</small>
+                {{ data.amount.rule.off.total }}
+                <small class="ank anm">{{ data.amount.rule.off.time_type }}</small>
             </h3>
             <span class="anj">关闭(OFF)</span>
         </div>
         <div class="gh gi apu ala">
             <h3 class="ani dj">
-                {{ data.amount.rules_total }}
-                <small class="ank anl">0.0%</small>
+                {{ data.amount.rule.total.total }}
+                <small class="ank anl">{{ data.amount.rule.total.time_type }}</small>
             </h3>
             <span class="anj">全部(Total)</span>
+        </div>
+    </div>
+
+    <div class="fu">
+        <div class="hp ali">
+            <div class="by">
+                <h4 class="ty">
+                    新增或优化规则(NIR)
+                </h4>
+                {% for item in data.rules %}
+                    <a class="ph" href="#">
+                        <span class="dy dh">{{ item.author }}</span>
+                        {{ item.description }}
+                    </a>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
@@ -148,7 +171,6 @@
     <div class="fu chart" id="chart_rhr" style="height:800px;">
 
     </div>
-    <hr class="aky">
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/echarts.min.js') }}"></script>
@@ -205,7 +227,7 @@
             ctx: null,
             options: {
                 'vt': {},
-                'vdd': {},
+                {#                'vdd': {},#}
                 'vtd': {},
                 'rar': {},
                 'rhr': {}
@@ -268,61 +290,63 @@
                 /*
                  * VDD (Vulnerability Department Distributing)
                  */
-                chart.options['vdd'] = {
-                    tooltip: {},
-                    title: [{
-                        text: 'TODO:漏洞部门分布(VDD)',
-                        textAlign: 'left'
-                    }],
-                    grid: [{
-                        top: 50,
-                        width: '50%',
-                        left: 10,
-                        containLabel: true
-                    }],
-                    xAxis: [{
-                        type: 'value',
-                        max: chart.data.vdd.all,
-                        splitLine: {
-                            show: false
-                        }
-                    }],
-                    yAxis: [{
-                        type: 'category',
-                        data: Object.keys(chart.data.vdd.charts),
-                        axisLabel: {
-                            interval: 0,
-                            rotate: 30
-                        },
-                        splitLine: {
-                            show: false
-                        }
-                    }],
-                    series: [{
-                        type: 'bar',
-                        stack: 'chart',
-                        z: 3,
-                        label: {
-                            normal: {
-                                position: 'right',
-                                show: true
-                            }
-                        },
-                        data: Object.keys(chart.data.vdd.charts).map(function (key) {
-                            return chart.data.vdd.charts[key];
-                        })
-                    }, {
-                        type: 'pie',
-                        radius: [0, '40%'],
-                        center: ['75%', '35%'],
-                        data: Object.keys(chart.data.vdd.charts).map(function (key) {
-                            return {
-                                name: key,
-                                value: chart.data.vdd.charts[key]
-                            }
-                        })
-                    }]
-                };
+                /*
+                 chart.options['vdd'] = {
+                 tooltip: {},
+                 title: [{
+                 text: 'TODO:漏洞部门分布(VDD)',
+                 textAlign: 'left'
+                 }],
+                 grid: [{
+                 top: 50,
+                 width: '50%',
+                 left: 10,
+                 containLabel: true
+                 }],
+                 xAxis: [{
+                 type: 'value',
+                 max: chart.data.vdd.all,
+                 splitLine: {
+                 show: false
+                 }
+                 }],
+                 yAxis: [{
+                 type: 'category',
+                 data: Object.keys(chart.data.vdd.charts),
+                 axisLabel: {
+                 interval: 0,
+                 rotate: 30
+                 },
+                 splitLine: {
+                 show: false
+                 }
+                 }],
+                 series: [{
+                 type: 'bar',
+                 stack: 'chart',
+                 z: 3,
+                 label: {
+                 normal: {
+                 position: 'right',
+                 show: true
+                 }
+                 },
+                 data: Object.keys(chart.data.vdd.charts).map(function (key) {
+                 return chart.data.vdd.charts[key];
+                 })
+                 }, {
+                 type: 'pie',
+                 radius: [0, '40%'],
+                 center: ['75%', '35%'],
+                 data: Object.keys(chart.data.vdd.charts).map(function (key) {
+                 return {
+                 name: key,
+                 value: chart.data.vdd.charts[key]
+                 }
+                 })
+                 }]
+                 };
+                 */
                 /*
                  * VTD (Vulnerability Type Distributing)
                  */
@@ -371,7 +395,7 @@
                         })
                     }, {
                         type: 'pie',
-                        radius: [0, '40%'],
+                        radius: [0, '55%'],
                         center: ['75%', '35%'],
                         data: Object.keys(chart.data.vtd.charts).map(function (key) {
                             return {
@@ -414,7 +438,7 @@
                     ,
                     yAxis: {
                         type: 'category',
-                        data: [{% for rank in data.amount.rule %}
+                        data: [{% for rank in data.amount.rar %}
                             '{{ rank['author'] }}',
                         {% endfor %}]
                     }
@@ -423,21 +447,21 @@
                         {
                             name: '一共(Total)',
                             type: 'bar',
-                            data: [{% for rank in data.amount.rule %}
+                            data: [{% for rank in data.amount.rar %}
                                 {{ rank['total'] }},
                             {% endfor %}]
                         },
                         {
                             name: '开启(On)',
                             type: 'bar',
-                            data: [{% for rank in data.amount.rule %}
+                            data: [{% for rank in data.amount.rar %}
                                 {{ rank['active'] }},
                             {% endfor %}]
                         },
                         {
                             name: '关闭(Off)',
                             type: 'bar',
-                            data: [{% for rank in data.amount.rule %}
+                            data: [{% for rank in data.amount.rar %}
                                 {{ rank['not_active'] }},
                             {% endfor %}]
                         }

@@ -6,7 +6,8 @@
 
     Implements various git methods
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
+    :author:    Lightless <root@lightless.me>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -15,58 +16,39 @@
 import os
 import re
 import subprocess
-import logging
 from urllib import quote
 from utils import config
+from utils.log import logging
 
 logging = logging.getLogger(__name__)
 
-"""
-usage and example.
 
-#!/usr/bin/env python
-from pickup.git import Git
-repo_address = 'your repo address here'
+class GitError(Exception):
+    def __init__(self, message):
+        Exception.__init__(self)
+        self.message = message
 
-# create a git object.
-# if the repo_address is a public repo:
-gg = Git(repo_address)
-# if the repo_address is a private repo:
-gg = Git(repo_address, username='your username here', password='your password here')
-# if the code on the other branch rather than master, try this:
-gg = Git(repo_address, branch='dev')
-# By default, if no branch param supply, it will be 'master'.
-
-# use get_repo() method to clone the repo, if already cloned, it will pull the latest version.
-gg.get_repo()
-
-# you can also call the special method manually.
-# clone() will clone the repo to local.
-# pull() will pull the local repo to the latest version.
-# gg.clone()
-# gg.pull()
-
-# Of course you can checkout to special branch
-gg.checkout('master')
-gg.checkout('dev')
-
-# diff(new_version, old_version, raw_output) method will diff the two version.
-# and return the diff result in str.
-diff_result = gg.diff('ef8ab030a54e3', '4640bc08a08f4')
-print diff_result
-
-# the third param "raw_output" will control the return format. default is False.
-# If it set True, it will return the "git diff" raw output, if it set to False (default is False),
-# it will return a dict which stores the formatted increment content.
-#
-# example output
-# {'bb.txt': ['hhhhhhh'], 'aa.txt': ['ccccc', 'ddddd']}
-# bb.txt add a line, the content is 'hhhhhhh'.
-# aa.txt add two line, the content is 'ccccc' and 'ddddd'.
-"""
+    def __str__(self):
+        return repr(self.message)
 
 
-class Git:
+class NotExistError(GitError):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return repr(self.message)
+
+
+class AuthError(GitError):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return repr(self.message)
+
+
+class Git(object):
     """
     A Git class.
     You can clone, pull, diff the repo via this class.
@@ -126,6 +108,8 @@ class Git:
         logging.info(pull_out)
         logging.info(pull_err)
 
+        self.parse_err(pull_err)
+
         pull_err = pull_err.replace('{0}:{1}'.format(self.repo_username, self.repo_password), '')
 
         # change work directory back.
@@ -143,8 +127,7 @@ class Git:
         """
         logging.info('Start Clone Repo...')
         if self.__check_exist():
-            logging.info('Repo Already Exist. Stop Clone.')
-            logging.debug('Directory exist, pull...')
+            logging.info('Repo Already Exist. Start Pull.')
             return self.pull()
             # call(['rm', '-rf', self.repo_directory])
 
@@ -166,12 +149,7 @@ class Git:
         logging.info(clone_out)
         logging.info(clone_err)
 
-        if 'not found' in clone_err or 'Not found' in clone_err:
-            return False, 'repo doesn\'t exist.'
-        elif 'already exists' in clone_err:
-            return False, 'repo has already cloned.'
-        elif 'Authentication failed' in clone_err:
-            return False, 'Authentication failed.'
+        self.parse_err(clone_err)
 
         clone_err = clone_err.replace('{0}:{1}'.format(self.repo_username, self.repo_password), '')
 
@@ -288,6 +266,15 @@ class Git:
             return self.clone()
 
     @staticmethod
+    def parse_err(err):
+        if 'not found' in err or 'Not found' in err:
+            raise NotExistError('Repo doesn\'t exist')
+        elif 'already exists' in err:
+            return False, 'repo has already cloned.'
+        elif 'Authentication failed' in err:
+            raise NotExistError('Authentication failed')
+
+    @staticmethod
     def committer(file, path, line_number, length=1):
         """
         git blame -L21,+1 -- git.py
@@ -305,7 +292,6 @@ class Git:
         cmd = "git blame -L{0},+{1} -- {2}".format(line_number, length, file)
         p = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         (checkout_out, checkout_err) = p.communicate()
-        logging.info(checkout_err)
         if len(checkout_out) != 0:
             group = re.findall(r'(?:.{8}\s\()(.*)\s(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})', checkout_out)
             return True, group[0][0], group[0][1]

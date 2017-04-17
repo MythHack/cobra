@@ -4,9 +4,9 @@
     utils.queue
     ~~~~~~~~~~~
 
-    实现漏洞推送队列
+    Implement Vulnerability Push Queue
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -16,7 +16,7 @@ from daemon import push_vulnerabilities, error_handler
 from utils.third_party import Vulnerabilities
 
 
-class Queue:
+class Queue(object):
     def __init__(self, project_name, vuln_name, vuln_type, file_path, line_number, code, vuln_id, found_time=None):
         self.project_name = project_name
         self.vuln_name = vuln_name

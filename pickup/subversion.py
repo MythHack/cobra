@@ -6,20 +6,20 @@
 
     Implements various subversion methods
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import subprocess
 import sys
-import logging
 from utils import config
+from utils.log import logging
 
 logging = logging.getLogger(__name__)
 
 
-class Subversion:
+class Subversion(object):
     """Subversion Utility Class"""
     svn = '/usr/bin/svn'
 

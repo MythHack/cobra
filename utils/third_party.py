@@ -4,21 +4,24 @@
     utils.third_party
     ~~~~~~~~~~~~~~~~~
 
-    实现第三方漏洞管理平台对接
+    Implement Third-party Vulnerability Manage Push
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
 """
 import json
 import requests
-import logging
 from utils import config
-from app import CobraResults, db
+from app.models import CobraResults
+from app import db
+from utils.log import logging
+
+logging = logging.getLogger(__name__)
 
 
-class Vulnerabilities:
+class Vulnerabilities(object):
     def __init__(self):
         self.status = config.Config('third_party_vulnerabilities', 'status').value
         self.api = config.Config('third_party_vulnerabilities', 'api').value

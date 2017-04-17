@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -7,7 +6,7 @@
 
     Implements scan
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -16,17 +15,18 @@ import os
 import time
 import subprocess
 import getpass
-import logging
-from app import db, CobraProjects, CobraTaskInfo
-from utils import config, decompress, log
+from app.models import CobraProjects, CobraTaskInfo
+from app import db
+from utils import config, decompress
+from utils.log import logging
 from pickup import git
+from pickup.git import NotExistError, AuthError
 from engine import detection
 
-log.Log()
 logging = logging.getLogger(__name__)
 
 
-class Scan:
+class Scan(object):
     def __init__(self, target):
         """
         Set target
@@ -83,25 +83,46 @@ class Scan:
         result['msg'] = u'success'
         return 1001, result
 
+    def pull_code(self, branch='master'):
+        logging.info('Gitlab project')
+        # Git
+        if 'gitlab' in self.target:
+            username = config.Config('git', 'username').value
+            password = config.Config('git', 'password').value
+        else:
+            username = None
+            password = None
+        gg = git.Git(self.target, branch=branch, username=username, password=password)
+
+        # Git Clone Error
+        try:
+            clone_ret, clone_err = gg.clone()
+            if clone_ret is False:
+                return 4001, 'Clone Failed ({0})'.format(clone_err), gg
+        except NotExistError:
+            # update project status
+            p = CobraProjects.query.filter_by(repository=self.target).first()
+            if p is not None:
+                if p.status == CobraProjects.get_status('on'):
+                    p.status = CobraProjects.get_status('off')
+                    db.session.add(p)
+                    db.session.commit()
+            return 4001, 'Repository Does not exist!', gg
+        except AuthError:
+            logging.critical('Git Authentication Failed')
+            return 4001, 'Repository Authentication Failed', gg
+        return 1001, 'Success', gg
+
     def version(self, branch=None, new_version=None, old_version=None):
         # Gitlab
         if '.git' in self.target:
-            logging.info('Gitlab project')
-            # Git
-            if 'gitlab' in self.target:
-                username = config.Config('git', 'username').value
-                password = config.Config('git', 'password').value
+            ret, desc, gg = self.pull_code(branch)
+            if ret == 1001:
+                repo_author = gg.repo_author
+                repo_name = gg.repo_name
+                repo_directory = gg.repo_directory
             else:
-                username = None
-                password = None
-            gg = git.Git(self.target, branch=branch, username=username, password=password)
-            repo_author = gg.repo_author
-            repo_name = gg.repo_name
-            repo_directory = gg.repo_directory
-            # Git Clone Error
-            clone_ret, clone_err = gg.clone()
-            if clone_ret is False:
-                return 4001, 'Clone Failed ({0})'.format(clone_err)
+                return ret, desc
         elif 'svn' in self.target:
             # SVN
             repo_name = 'mogujie'

@@ -6,7 +6,7 @@
 
     Implements models
 
-    :author:    Feei <feei#feei.cn>
+    :author:    Feei <feei@feei.cn>
     :homepage:  https://github.com/wufeifei/cobra
     :license:   MIT, see LICENSE for more details.
     :copyright: Copyright (c) 2017 Feei. All rights reserved
@@ -21,6 +21,9 @@ from sqlalchemy.dialects.mysql import TINYINT, INTEGER, SMALLINT, TEXT
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db
+from utils.log import logging
+
+logging = logging.getLogger(__name__)
 
 
 class CobraTaskInfo(db.Model):
@@ -72,6 +75,47 @@ class CobraTaskInfo(db.Model):
     def __repr__(self):
         return '<task_info %r - %r>' % (self.id, self.target)
 
+    @staticmethod
+    def count_by_time(start, end, t='task'):
+        filter_group = (
+            CobraTaskInfo.created_at >= '{0} 00:00:00'.format(start),
+            CobraTaskInfo.created_at <= '{0} 23:59:59'.format(end),
+            # Active project
+            CobraProjects.status > 0,
+            CobraProjects.repository == CobraTaskInfo.target
+        )
+        count = 0
+        if t == 'task':
+            count = db.session.query(
+                func.count(CobraTaskInfo.id).label('count')
+            ).filter(
+                *filter_group
+            ).first()
+        elif t == 'project':
+            count = db.session.query(
+                func.count(func.distinct(CobraTaskInfo.target)).label('count')
+            ).filter(
+                *filter_group
+            ).first()
+        elif t == 'line':
+            count = db.session.query(
+                func.sum(CobraTaskInfo.code_number).label('count')
+            ).filter(
+                *filter_group
+            ).first()
+        elif t == 'file':
+            count = db.session.query(
+                func.sum(CobraTaskInfo.file_count).label('count')
+            ).filter(
+                *filter_group
+            ).first()
+
+        if count[0] is None:
+            return 0
+        else:
+            logging.debug('SD {t} {start} {end} {count}'.format(start=start, end=end, t=t, count=int(count[0])))
+            return int(count[0])
+
 
 class CobraRules(db.Model):
     """
@@ -121,6 +165,24 @@ class CobraRules(db.Model):
 
     def __repr__(self):
         return "<CobraRules %r - %r: %r>" % (self.id, self.language, self.regex_location)
+
+    @staticmethod
+    def count_by_time(start, end):
+        filter_group = (CobraRules.updated_at >= '{0} 00:00:00'.format(start), CobraRules.updated_at <= '{0} 23:59:59'.format(end),)
+        count = db.session.query(
+            func.count().label('count'), CobraRules.status
+        ).filter(
+            *filter_group
+        ).group_by(CobraRules.status).all()
+        c_dict = {}
+        for ci in count:
+            count, status = ci
+            c_dict[status] = count
+        if 0 not in c_dict:
+            c_dict[0] = 0
+        if 1 not in c_dict:
+            c_dict[1] = 0
+        return c_dict
 
 
 class CobraVuls(db.Model):
@@ -229,17 +291,29 @@ class CobraResults(db.Model):
         return "<CobraResults %r - %r>" % (self.id, self.task_id)
 
     @staticmethod
-    def count_by_day(day):
-        localtime = time.localtime(time.time() + (day * 86400))
-        print(time.strftime('%Y-%m-%d', localtime))
-        filter_group = (CobraResults.id > 0,)
-        if day is not None:
-            filter_group += (CobraResults.created_at >= time.strftime('%Y-%m-%d 00:00:00', localtime), CobraResults.created_at <= time.strftime('%Y-%m-%d 23:59:59', localtime),)
+    def get_status(status):
+        state_int = {
+            0: 'init',
+            1: 'pushed',
+            2: 'fixed'
+        }
+        if isinstance(status, str):
+            return {v: k for k, v in state_int.items()}[status.lower()]
+        else:
+            return state_int[status]
+
+    @staticmethod
+    def count_by_time(start, end):
         count = db.session.query(
-            func.count().label('count'), CobraResults.status
+            func.count(CobraResults.id).label('count'), CobraResults.status
         ).filter(
-            *filter_group
+            CobraResults.created_at >= '{start} 00:00:00'.format(start=start),
+            CobraResults.created_at <= '{end} 23:59:59'.format(end=end),
+            # Active project
+            CobraProjects.status > 0,
+            CobraResults.project_id == CobraProjects.id
         ).group_by(CobraResults.status).all()
+        logging.debug('VT {start} {end} {count}'.format(start=start, end=end, count=count))
         c_dict = {}
         for ci in count:
             count, status = ci
@@ -268,6 +342,11 @@ class CobraProjects(db.Model):
     framework = db.Column(db.String(32), nullable=False, default=None)
     pe = db.Column(db.String(32), nullable=False, default=None)
     remark = db.Column(db.String(512), nullable=False, default=None)
+    #
+    # `status` field description
+    #   1: on
+    #   0: off
+    #
     status = db.Column(TINYINT, nullable=False, default=1)
     last_scan = db.Column(db.DateTime, nullable=False, default=None)
     created_at = db.Column(db.DateTime, nullable=False, default=None)
@@ -294,6 +373,17 @@ class CobraProjects(db.Model):
             self.updated_at = current_time
         else:
             self.updated_at = updated_at
+
+    @staticmethod
+    def get_status(status):
+        state_int = {
+            0: 'off',
+            1: 'on'
+        }
+        if isinstance(status, str):
+            return {v: k for k, v in state_int.items()}[status.lower()]
+        else:
+            return state_int[status]
 
     def __repr__(self):
         return "<CobraProjects %r - %r>" % (self.id, self.name)
