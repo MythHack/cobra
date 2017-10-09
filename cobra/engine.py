@@ -175,9 +175,11 @@ def scan(target_directory, a_sid=None, s_sid=None, special_rules=None, language=
             return False
         logger.info('[PUSH] {rc} Rules'.format(rc=len(rules)))
         push_rules = []
+        off_rules = 0
         for idx, single_rule in enumerate(rules):
             if single_rule['status'] is False:
-                logger.info('[CVI-{cvi}] [STATUS] OFF, CONTINUE...'.format(cvi=single_rule['id']))
+                off_rules += 1
+                logger.debug('[CVI-{cvi}] [STATUS] OFF, CONTINUE...'.format(cvi=single_rule['id']))
                 continue
             # SR(Single Rule)
             logger.debug("""[PUSH] [CVI-{cvi}] {idx}.{name}({language})""".format(
@@ -227,7 +229,7 @@ def scan(target_directory, a_sid=None, s_sid=None, special_rules=None, language=
     if vn == 0:
         logger.info('[SCAN] Not found vulnerability!')
     else:
-        logger.info("[SCAN] Trigger Rules: {tr} Vulnerabilities ({vn})\r\n{table}".format(tr=len(trigger_rules), vn=len(find_vulnerabilities), table=table))
+        logger.info("[SCAN] Trigger Rules/Not Trigger Rules/Off Rules: {tr}/{ntr}/{fr} Vulnerabilities ({vn})\r\n{table}".format(tr=len(trigger_rules), ntr=len(diff_rules), fr=off_rules, vn=len(find_vulnerabilities), table=table))
         if len(diff_rules) > 0:
             logger.info('[SCAN] Not Trigger Rules ({l}): {r}'.format(l=len(diff_rules), r=','.join(diff_rules)))
 
@@ -522,7 +524,7 @@ class Core(object):
                - Java:
         :return: boolean
         """
-        match_result = re.findall(r"(#|\\\*|\/\/)+", self.code_content)
+        match_result = re.findall(r"^(#|\\\*|\/\/)+", self.code_content)
         # Skip detection only on match
         if self.is_match_only_rule():
             return False
@@ -620,13 +622,16 @@ class Core(object):
             if self.file_path[-3:].lower() == 'php':
                 try:
                     ast = CAST(self.rule_match, self.target_directory, self.file_path, self.line_number, self.code_content)
+                    rule_repair = []
                     if self.rule_match_mode == const.mm_function_param_controllable:
-                        rule_match = self.rule_match.strip('()').split('|')
+                        rule_match = self.rule_match.strip('()').split('|')  # 漏洞规则整理为列表
+                        if self.rule_repair is not None:
+                            rule_repair = self.rule_repair.strip('()').split('|')  # 修复规则整理为列表
                         logger.debug('[RULE_MATCH] {r}'.format(r=rule_match))
                         try:
                             with open(self.file_path, 'r') as fi:
                                 code_contents = fi.read()
-                                result = scan_parser(code_contents, rule_match, self.line_number)
+                                result = scan_parser(code_contents, rule_match, self.line_number, rule_repair)
                                 logger.debug('[AST] [RET] {c}'.format(c=result))
                                 if len(result) > 0:
                                     if result[0]['code'] == 1:  # 函数参数可控

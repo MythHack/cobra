@@ -3,6 +3,26 @@ Cobra Changelog
 
 Here you can see the full list of changes between each Cobra release.
 
+Version 2.0.0-alpha.5
+---------------------
+
+Released on Sep 15 2017
+
+- 增加漏洞搜索在报告页 #475
+- 优化Log输出 #570
+- 增加yacc依赖帮助 #569
+- 更改默认使用方法及参数配置
+- 其它细节优化和Bug修复
+
+Version 2.0.0-alpha.4
+---------------------
+
+Released on Sep 12 2017
+
+- 增加WebShell规则和测试用例 #571
+- 支持FPC模式修复函数 #565 #559
+- 其它细节优化和Bug修复
+
 Version 2.0.0-alpha.3
 ---------------------
 
